@@ -6,6 +6,7 @@ MEDIA_DIR = "#ERROR#"
 
 try:
     env_MEDIA_DIR = os.getenv("MEDIA_DIR")
+    print(env_MEDIA_DIR)
 except NameError:
     try:
         env_MEDIA_DIR = os.environ['MEDIA_DIR']
@@ -17,10 +18,11 @@ if not (env_MEDIA_DIR is None):
 elif os.path.exists("media_dir.txt"):
     with open("media_dir.txt", 'rU') as media_file:
         MEDIA_DIR = media_file.readline().strip()
+        print(MEDIA_DIR)
 else:
     MEDIA_DIR = os.path.join(
         os.path.expanduser('~'),
-        "Dropbox (3Blue1Brown)/3Blue1Brown Team Folder"
+        "~/gitrepo/pca_vid/casey_sandbox/media_output"
     )
 
 if not os.path.exists(MEDIA_DIR):

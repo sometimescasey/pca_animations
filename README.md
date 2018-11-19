@@ -1,3 +1,12 @@
+# pca-vid
+
+Clone of the manim repository at https://github.com/3b1b/manim, for a video on PCA.
+
+Changes are:
+
+* casey_sandbox folder, for my video scripts / playing around
+* A few limited changes made to manim itself, for my purposes
+
 # Manim
 Animation engine for explanatory math videos.
 

@@ -18,3 +18,7 @@ manim.sublime-workspace
 
 primes.py
 /media_dir.txt
+
+*.mp4
+casey_sandbox/output/*
+casey_sandbox/manim_tutorial_1/*
