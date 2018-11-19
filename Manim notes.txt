@@ -1,0 +1,11 @@
+Manim notes
+
+0,0 for line is the center of the screen
+7 is just before the right edge of the screen
+4 is just before the top edge of the screen
+
+These units are defined in constants.py
+
+Enclose latex in $ $ - otherwise will not compile
+
+CONFIG() dictionary: a method called digest_config() gets called, and takes configs from the child first, then the parent (child overrides parent values)
