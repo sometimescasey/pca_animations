@@ -1,6 +1,8 @@
 from big_ol_pile_of_manim_imports import *
 from once_useful_constructs.matrix_multiplication import *
 from casey_sandbox.colorMatrix import *
+from casey_sandbox.cov_mtx_6 import cov_mtx_6
+import time
 
 class Shapes(Scene):
 	# Just make some simple shapes
@@ -420,7 +422,7 @@ class SixStack(Scene):
 			mtx_l.scale(scale*1.5)
 			mtx_l.shift(UP*i*0.7)
 			
-			# Normal version
+			# Stack version
 			mtx = colorMatrixSkew(bg_img_np, shadow=True).mtx()
 			mtx.scale(scale)
 			mtx.shift(UP*i*0.3)
@@ -428,7 +430,6 @@ class SixStack(Scene):
 			# Flat version
 			dim = bg_img_np.shape[0]
 			bg_img_np_flat = bg_img_np.reshape((dim*dim,1))
-
 			mtx_f = colorMatrixSkew(bg_img_np_flat, shadow=True).mtx()
 			mtx_f.scale(scale)
 			mtx_f.shift(UP*i*0.3)
@@ -453,20 +454,27 @@ class SixStack(Scene):
 		self.play(ReplacementTransform(stack, stack_f))
 		self.wait()
 
+		self.play(ApplyMethod(stack_f.shift,3.5*LEFT))
+		self.wait()
+
+		cov_arrow = Arrow([-1.7,0,0],[0.5,0,0], color=WHITE, stroke_width=5)
+    
+		cov_np = np.array(cov_mtx_6) # imported from cov_mtx_6.py for keeping things clean
+		print(cov_np.shape)
+		cov_mtx = colorMatrix(cov_np, no_text=True, norm_colors=True).mtx().shift(RIGHT*3)
+		cov_mtx.scale(0.07)
+
+		cov_label = TextMobject("64 $\\times$ 64\\\covariance matrix").shift(RIGHT*3)
+		cov_label.scale(1)
+		cov_group = VGroup(cov_mtx, cov_label)
+		self.play(FadeInFrom(cov_arrow, LEFT), FadeInFrom(cov_group, LEFT))
+
+		self.wait()
+
 
 class TestMatrixSkew(Scene):
 	def construct(self):
 		basis = RoundedRectangle(height=3, width=0.7, corner_radius=0.2).move_to(DOWN*0.81+LEFT*1.65)
-
-		cov_mtx_0 = [[ 0.231,  0.172,  0.151,  0.135,  0.003,  0.148,  0.122,  0.172,  0.137],
-					[ 0.172,  0.284,  0.178,  0.158,  0.002,  0.174,  0.14 ,  0.187,  0.142],
-					[ 0.151,  0.178,  0.243,  0.162, -0.005,  0.154,  0.144,  0.172,  0.122],
-					[ 0.135,  0.158,  0.162,  0.229, -0.006,  0.136,  0.106,  0.144,  0.125],
-					[ 0.003,  0.002, -0.005, -0.006,  0.099, -0.002,  0.002,  0.005, -0.001],
-					[ 0.148,  0.174,  0.154,  0.136, -0.002,  0.231,  0.135,  0.179,  0.132],
-					[ 0.122,  0.14 ,  0.144,  0.106,  0.002,  0.135,  0.196,  0.138,  0.1  ],
-					[ 0.172,  0.187,  0.172,  0.144,  0.005,  0.179,  0.138,  0.26 ,  0.147],
-					[ 0.137,  0.142,  0.122,  0.125, -0.001,  0.132,  0.1  ,  0.147,  0.201]]
 
 		# requires list of strings
 		matrix = Matrix([["1","2"],["3","4"]]).shift(2*RIGHT)

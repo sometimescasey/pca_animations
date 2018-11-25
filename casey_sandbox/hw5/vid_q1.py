@@ -108,6 +108,11 @@ def compute_sigma_mles(train_data, train_labels):
 		sum_sq_residuals = np.dot(residuals.T, residuals)
 		covariances[k] = sum_sq_residuals / class_subarray.shape[0] + diag
 		# covariances[k] = np.cov(class_subarray, rowvar=False) + diag
+		if (k==6):
+			np.set_printoptions(threshold=np.nan, precision=2)
+			with open("six_cov.txt", "w") as text_file:
+				text_file.write(repr(covariances[k]))
+			# print(repr(covariances[k]))
 
 	return covariances
 
@@ -298,7 +303,9 @@ def main():
 
 	# one_per_class(train_data, train_labels)
 	for j in range(10):
-		one_class_save(train_data, train_labels, j)
+		pass
+		# turn this on to save images to files
+		# one_class_save(train_data, train_labels, j)
 	### [CHECK: DATA] Display some images and labels to ensure those match up
 	n = 20
 	display_img_w_label(train_data[0:n], train_labels[0:n])
