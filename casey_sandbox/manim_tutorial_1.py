@@ -252,34 +252,6 @@ class ExampleThreeD(ThreeDScene):
 
 		self.wait(60)
 
-# def colorMatrix():
-# 	mtx = np.asarray([[1,0],[0.5,1]])
-# 	m = mtx.shape[0]
-# 	n = mtx.shape[1]
-
-# 	s = 1.0 # width of each square
-
-# 	sq_list = []
-# 	sq_num = []
-
-# 	count=0
-# 	for r in range(m):
-# 		for c in range(n):
-# 			shade = (mtx[r][c])
-# 			sq = Square(side_length=1.0, fill_opacity=1, stroke_width=0, fill_color=Color(rgb=(shade, shade, shade))).move_to(r*UP+c*LEFT)
-# 			sq_list.append(sq)
-# 			label = TextMobject(str(mtx[r][c]),color=Color(rgb=(1,0,0)),size=8,background_stroke_width=0).move_to(r*UP+c*LEFT)
-# 			sq_num.append(label)
-# 			# self.add(sq_list[count], sq_num[count])
-# 			count += 1
-
-# 	outline = Rectangle(height=s*m, width=s*n).move_to(s*UP/m+s*LEFT/n)
-
-# 	# * operator expands lists before the function call
-# 	group = VGroup(outline, *sq_list, *sq_num)
-# 	# self.add(outline, *sq_list, *sq_num)
-# 	return group
-
 class TestMatrix(Scene):
 	def construct(self):
 		basis = RoundedRectangle(height=3, width=0.7, corner_radius=0.2).move_to(DOWN*0.81+LEFT*1.65)
@@ -301,9 +273,9 @@ class TestMatrix(Scene):
 		self.wait(1)
 		mtx = np.asarray([[1,0,1],[0.5,1,2],[3,4,5]])
 		mtx_flat = np.asarray([[1,0,1],[0.5,1,2],[3,4,5]]).reshape(9,1)
-		matrix_group = colorMatrix(mtx, width=0.5, text_scale=0.5).shift(2*LEFT)
-		matrix_group2 = colorMatrix(mtx_flat, width=0.5, text_scale=0.5).shift(4*LEFT)
-		matrix_group3 = colorMatrix(mtx, width=0.5, text_scale=0.5).shift(2*LEFT)
+		matrix_group = colorMatrix(mtx, width=0.5, text_scale=0.5, no_text=False).shift(2*LEFT)
+		matrix_group2 = colorMatrix(mtx_flat, width=0.5, text_scale=0.5, no_text=False).shift(4*LEFT)
+		matrix_group3 = colorMatrix(mtx, width=0.5, text_scale=0.5, no_text=False).shift(2*LEFT)
 
 		self.add(matrix_group)
 		self.wait(1)
@@ -314,10 +286,187 @@ class TestMatrix(Scene):
 
 class Intro(Scene):
 	def construct(self):
+		# Title
+		# -------------------
 		pca = TextMobject("Principal Component Analysis (PCA)").move_to(TOP+DOWN*1)
 		pca.scale(1)
+		self.add(pca)
 
-		one = ImageMobject("casey_sandbox/pup.jpg", invert=False, image_mode="RGBA")
-		one.scale(1)
-		self.add(one, pca)
+		# ## Intro Images
+		# -------------------
+
+		cols = 10
+		rows = 3
+		total = cols*rows
+
+		digits = [None] * cols * rows
+		ddd = [None] * cols
+		last_row = [None] * cols
+ 
+		img_scale = 0.4
+
+		count = 0
+		for i in range(0,rows):
+			for j in range(0,cols):
+				digits[count] = ImageMobject("casey_sandbox/scenes/1_intro/assets/" + str(j) + ".0_" + str(i) +".png", 
+					invert=False, image_mode="RGBA").shift((j-4)*RIGHT*1.2+(i-1)*DOWN*1.2).shift(LEFT*0.5)
+				digits[count].scale(0.4)
+				count += 1
+			
+		for i in range(0,cols):
+			ddd[i] = TextMobject("...").next_to(digits[total-i-1]).shift(DOWN*2*img_scale+LEFT*2*img_scale)
+		
+
+		for j in range(0,cols):
+			last_row[j] = ImageMobject("casey_sandbox/scenes/1_intro/assets/" + str(j) + ".0_" + str(rows) +".png", 
+					invert=False, image_mode="RGBA").shift((j-4)*RIGHT*1.2+(rows-1)*DOWN*1.5).shift(LEFT*0.5)
+			last_row[j].scale(0.4)
+				
+		self.add(*digits, *ddd, *last_row)
 		self.wait(2)
+
+		# ## Each is 8x8 = 64
+		# -------------------
+		a = digits[0].get_corner(UP+LEFT)+UP*0.25
+		b = digits[0].get_corner(DOWN+LEFT)+DOWN*0.25
+		c = digits[0].get_corner(UP+LEFT)+LEFT*0.25
+		d = digits[0].get_corner(UP+RIGHT)+RIGHT*0.25
+		eight_v = DoubleArrow(start=a, end=b, tip_length=0.1, tip_width_to_length_ratio=1, color=YELLOW).shift(0.2*LEFT)
+		eight_v_l = TextMobject("8px", color=YELLOW).next_to(eight_v).shift(LEFT*1.1)
+		eight_v_l.scale(0.7)
+		eight_h = DoubleArrow(start=c, end=d, tip_length=0.1, tip_width_to_length_ratio=1, color=YELLOW).shift(0.2*UP)
+		eight_h_l = TextMobject("8px", color=YELLOW).next_to(eight_h.get_corner(TOP+LEFT)).shift(UP*0.3+LEFT*0.2)
+		eight_h_l.scale(0.7)
+		
+		eight_by_eight = VGroup(eight_v, eight_v_l, eight_h, eight_h_l)
+		self.play(FadeIn(eight_by_eight))
+
+		sixtyfour = TextMobject("= 64 pixels = 64 dimensions", color=YELLOW).next_to(digits[1].get_corner(TOP+LEFT)).shift(UP*0.5+LEFT*0.3)
+		
+		# = 64 dimensions
+		self.play(FadeIn(sixtyfour))
+
+		self.wait(1)
+		self.play(FadeOut(sixtyfour), FadeOut(eight_by_eight), FadeOut(pca))
+
+		
+		## Each pixel can range from 0 for white to 1 for black
+		# -------------------
+		zero = TextMobject("0").next_to(digits[1].get_corner(TOP+LEFT)).shift(UP*0.5+LEFT*0.3)
+		to = TextMobject("to").next_to(zero)
+		one = TextMobject("1", background_stroke_color=WHITE, color=BLACK).next_to(to)
+		# to.set_color_by_gradient(WHITE, BLACK)
+		rect_1 = Rectangle(width=0.15, height=0.15, fill_color=WHITE, fill_opacity=1).next_to(zero).shift(UP*0.5+LEFT*0.42)
+		rect_2 = Rectangle(width=0.2, height=0.2, fill_color=BLACK, 
+			fill_opacity=1, background_stroke_color=WHITE, 
+			stroke_width=2).next_to(zero).shift(UP*0.5+RIGHT*0.64)
+		arrow = Arrow(start=zero, end=one)
+		
+		zero_to_one = VGroup(zero, arrow, rect_1, one)
+		self.wait(1)
+		self.play(FadeInFrom(zero_to_one, direction=LEFT))
+		self.wait(1)
+		self.play(Transform(rect_1, rect_2))
+		self.wait(2)
+
+
+
+		## 255 disclaimer
+		# ----------
+		l1 = TextMobject("* This is reversed from the usual convention where black is 0 and white is 255, but the math doesn't change. We're just flipping the scale backwards and dividing the value by 255.", color=WHITE).next_to(one).shift(LEFT*3.5+UP*0.5) 
+		l1.scale(0.5)
+		# l2 = TextMobject("", color=WHITE).next_to(l1, DOWN).shift(UP*0.5)
+		# l2.scale(0.5)
+
+		disclaimer = VGroup(l1)
+		self.add(disclaimer)
+		self.wait(1)
+		self.remove(disclaimer)
+		self.wait(1)
+
+		self.play(FadeOut(zero_to_one), FadeOut(rect_2))
+		self.wait()
+
+		# Green box around sixes
+		# -----------------------
+		six_box = RoundedRectangle(color=GREEN, 
+			stroke_width=4, 
+			height=5.8, width=1.2, 
+			corner_radius=0.2).move_to(digits[6]).shift(DOWN*2.15)
+		self.play(FadeIn(six_box))
+
+		self.wait(2)
+
+
+class SixStack(Scene):
+	def construct(self):
+
+		stack_h = 10
+		six = [None] * stack_h
+		digit_choice = 6
+
+		count = 0
+		for i in range(0,stack_h):
+			j = digit_choice
+			a = [0,0,0] + LEFT
+			b = [1,0,0]
+			c = [1,1,0] + RIGHT
+			d = [0,1,0]
+			six[i] = Polygon(a,b,c,d, color=WHITE, stroke_width=0)
+			bg_img = "casey_sandbox/scenes/1_intro/assets/" + str(j) + ".0_" + str(i) +".png"
+			six[i].color_using_background_image(bg_img)
+			# ImageMobject("casey_sandbox/scenes/1_intro/assets/" + str(j) + ".0_" + str(i) +".png", 
+			# 	invert=False, image_mode="RGBA").shift((i-1)*DOWN*1.2)
+			six[i].scale(0.4)
+
+		self.add(*six)
+
+		self.wait()
+
+class TestMatrixSkew(Scene):
+	def construct(self):
+		basis = RoundedRectangle(height=3, width=0.7, corner_radius=0.2).move_to(DOWN*0.81+LEFT*1.65)
+
+		cov_mtx_0 = [[ 0.231,  0.172,  0.151,  0.135,  0.003,  0.148,  0.122,  0.172,  0.137],
+					[ 0.172,  0.284,  0.178,  0.158,  0.002,  0.174,  0.14 ,  0.187,  0.142],
+					[ 0.151,  0.178,  0.243,  0.162, -0.005,  0.154,  0.144,  0.172,  0.122],
+					[ 0.135,  0.158,  0.162,  0.229, -0.006,  0.136,  0.106,  0.144,  0.125],
+					[ 0.003,  0.002, -0.005, -0.006,  0.099, -0.002,  0.002,  0.005, -0.001],
+					[ 0.148,  0.174,  0.154,  0.136, -0.002,  0.231,  0.135,  0.179,  0.132],
+					[ 0.122,  0.14 ,  0.144,  0.106,  0.002,  0.135,  0.196,  0.138,  0.1  ],
+					[ 0.172,  0.187,  0.172,  0.144,  0.005,  0.179,  0.138,  0.26 ,  0.147],
+					[ 0.137,  0.142,  0.122,  0.125, -0.001,  0.132,  0.1  ,  0.147,  0.201]]
+
+		# requires list of strings
+		matrix = Matrix([["1","2"],["3","4"]]).shift(2*RIGHT)
+
+		self.add(matrix)
+		self.wait(1)
+		j = 6
+		i = 0
+		bg_img = "casey_sandbox/scenes/1_intro/assets/tiny/" + str(j) + ".0_" + str(i) +".png"
+		
+		mtx = imgToMtx(bg_img)
+		print("Returned mtx from image.")
+
+		#mtx = np.asarray([[1,0,1],[0.5,1,2],[3,4,5]])
+		#mtx_flat = np.asarray([[1,0,1],[0.5,1,2],[3,4,5]]).reshape(9,1)
+		
+		matrix_group = colorMatrix(mtx, no_text=True).shift(2*LEFT)
+		matrix_group.scale(0.2)
+
+		matrix_group_skew = colorMatrixSkew(mtx).shift(2*LEFT)
+		matrix_group_skew.scale(0.1)
+		
+		matrix_group2 = colorMatrix(mtx, no_text=True).shift(2*LEFT)
+		matrix_group2.scale(0.2)
+
+
+		self.add(matrix_group)
+		self.wait(1)
+		
+		self.play(ReplacementTransform(matrix_group, matrix_group_skew))
+		self.wait()
+		self.play(Transform(matrix_group_skew, matrix_group2))
+		
+		self.wait()
