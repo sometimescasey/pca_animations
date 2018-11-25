@@ -273,9 +273,9 @@ class TestMatrix(Scene):
 		self.wait(1)
 		mtx = np.asarray([[1,0,1],[0.5,1,2],[3,4,5]])
 		mtx_flat = np.asarray([[1,0,1],[0.5,1,2],[3,4,5]]).reshape(9,1)
-		matrix_group = colorMatrix(mtx, width=0.5, text_scale=0.5, no_text=False).shift(2*LEFT)
-		matrix_group2 = colorMatrix(mtx_flat, width=0.5, text_scale=0.5, no_text=False).shift(4*LEFT)
-		matrix_group3 = colorMatrix(mtx, width=0.5, text_scale=0.5, no_text=False).shift(2*LEFT)
+		matrix_group = colorMatrix(mtx, text_scale=0.5, no_text=False).mtx().shift(2*LEFT)
+		matrix_group2 = colorMatrix(mtx_flat, text_scale=0.5, no_text=False).mtx().shift(4*LEFT)
+		matrix_group3 = colorMatrix(mtx, text_scale=0.5, no_text=False).mtx().shift(2*LEFT)
 
 		self.add(matrix_group)
 		self.wait(1)
@@ -401,27 +401,58 @@ class Intro(Scene):
 class SixStack(Scene):
 	def construct(self):
 
+		scale = 0.05
 		stack_h = 10
-		six = [None] * stack_h
+
+		six_l = [None] * stack_h # Normal square
+		six = [None] * stack_h # Stack
+		six_f = [None] * stack_h # Flattened stack
+
 		digit_choice = 6
 
 		count = 0
 		for i in range(0,stack_h):
 			j = digit_choice
-			a = [0,0,0] + LEFT
-			b = [1,0,0]
-			c = [1,1,0] + RIGHT
-			d = [0,1,0]
-			six[i] = Polygon(a,b,c,d, color=WHITE, stroke_width=0)
-			bg_img = "casey_sandbox/scenes/1_intro/assets/" + str(j) + ".0_" + str(i) +".png"
-			six[i].color_using_background_image(bg_img)
-			# ImageMobject("casey_sandbox/scenes/1_intro/assets/" + str(j) + ".0_" + str(i) +".png", 
-			# 	invert=False, image_mode="RGBA").shift((i-1)*DOWN*1.2)
-			six[i].scale(0.4)
 
-		self.add(*six)
+			# Normal version
+			bg_img_np = imgToMtx("casey_sandbox/scenes/1_intro/assets/tiny/" + str(j) + ".0_" + str(i) +".png")
+			mtx_l = colorMatrix(bg_img_np, no_text=True).mtx()
+			mtx_l.scale(scale*1.5)
+			mtx_l.shift(UP*i*0.7)
+			
+			# Normal version
+			mtx = colorMatrixSkew(bg_img_np, shadow=True).mtx()
+			mtx.scale(scale)
+			mtx.shift(UP*i*0.3)
 
+			# Flat version
+			dim = bg_img_np.shape[0]
+			bg_img_np_flat = bg_img_np.reshape((dim*dim,1))
+
+			mtx_f = colorMatrixSkew(bg_img_np_flat, shadow=True).mtx()
+			mtx_f.scale(scale)
+			mtx_f.shift(UP*i*0.3)
+
+			six_l[i] = mtx_l
+			six[i] = mtx
+			six_f[i] = mtx_f
+
+		six_list = VGroup(*six_l)
+		six_list.shift(DOWN*3)
+		
+		stack = VGroup(*six)
+		stack.shift(DOWN*1.5)
+		
+		stack_f = VGroup(*six_f)
+		stack_f.shift(DOWN*1.5)
+		
+		self.add(six_list)
+		self.wait(2)
+		self.play(ReplacementTransform(six_list, stack))
+		self.wait(1)
+		self.play(ReplacementTransform(stack, stack_f))
 		self.wait()
+
 
 class TestMatrixSkew(Scene):
 	def construct(self):
@@ -452,13 +483,13 @@ class TestMatrixSkew(Scene):
 		#mtx = np.asarray([[1,0,1],[0.5,1,2],[3,4,5]])
 		#mtx_flat = np.asarray([[1,0,1],[0.5,1,2],[3,4,5]]).reshape(9,1)
 		
-		matrix_group = colorMatrix(mtx, no_text=True).shift(2*LEFT)
+		matrix_group = colorMatrix(mtx, no_text=True).mtx().shift(2*LEFT)
 		matrix_group.scale(0.2)
 
-		matrix_group_skew = colorMatrixSkew(mtx).shift(2*LEFT)
+		matrix_group_skew = colorMatrixSkew(mtx).mtx().shift(2*LEFT)
 		matrix_group_skew.scale(0.1)
 		
-		matrix_group2 = colorMatrix(mtx, no_text=True).shift(2*LEFT)
+		matrix_group2 = colorMatrix(mtx, no_text=True).mtx().shift(2*LEFT)
 		matrix_group2.scale(0.2)
 
 
