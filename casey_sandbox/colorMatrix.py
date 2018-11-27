@@ -2,14 +2,14 @@ from big_ol_pile_of_manim_imports import *
 from PIL import Image
 import time
 
-class colorMatrix:
-	def __init__(self, mtx, text_scale=1.0, no_text=False, norm_colors=False):
-		self.__mtx = self.make_mtx_group(mtx, text_scale, no_text, norm_colors)
+class ColorMatrix:
+	def __init__(self, mtx, text_scale=1.0, no_text=False, norm_colors=False, tint='K'):
+		self.__mtx = self.make_mtx_group(mtx, text_scale, no_text, norm_colors, tint)
 
 	def mtx(self):
 		return self.__mtx
 
-	def make_mtx_group(self, mtx, text_scale, no_text, norm_colors):
+	def make_mtx_group(self, mtx, text_scale, no_text, norm_colors, tint):
 		m = mtx.shape[0]
 		n = mtx.shape[1]
 
@@ -36,7 +36,21 @@ class colorMatrix:
 				else:
 					shade = (mtx[r][c]) / denom
 					shade = max(0, shade) # hack to prevent negative values from messing things up
-				sq = Square(side_length=s, fill_opacity=1, stroke_width=0, fill_color=Color(rgb=(shade, shade, shade))).move_to(r*DOWN*s+c*RIGHT*s)
+					
+				if tint=='R':
+					print("tint is R")
+					color_base = [1, 0, 0]
+				elif tint=='G': 
+					color_base = [0, 1, 0]
+				elif tint=='B':
+					color_base = [0, 0, 1]
+				else:
+					color_base = [1, 1, 1] # default black
+
+				color_prod = np.multiply(color_base, shade)
+				
+				color = Color(rgb=(color_prod[0], color_prod[1], color_prod[2]))
+				sq = Square(side_length=s, fill_opacity=1, stroke_width=0, fill_color=color).move_to(r*DOWN*s+c*RIGHT*s)
 				sq_list.append(sq)
 				
 				if (not no_text):
@@ -57,18 +71,18 @@ class colorMatrix:
 		bottom_l = top_l + m*s*DOWN
 		bottom_r = bottom_l + n*s*RIGHT
 
-		outline = Polygon(top_l, top_r, bottom_r, bottom_l, color=WHITE) 
+		outline = Polygon(top_l, top_r, bottom_r, bottom_l, color=WHITE, stroke_width=2) 
 		# * operator expands lists before the function call
 		if (no_text):
-			group = VGroup(outline, *sq_list)
+			group = VGroup(*sq_list, outline)
 		else:
-			group = VGroup(outline, *sq_list, *sq_num)
+			group = VGroup(*sq_list, *sq_num, outline)
 		# Move back to center
 		group.move_to(ORIGIN)
 
 		return group
 
-class colorMatrixSkew:
+class ColorMatrixSkew:
 	def __init__(self, mtx, skew=1, shadow=False):
 		self.__mtx = self.make_mtx_group(mtx, skew, shadow)
 
@@ -115,7 +129,7 @@ class colorMatrixSkew:
 		bottom_l = top_l + m*s*DOWN + RIGHT*m*skew
 		bottom_r = bottom_l + n*s*RIGHT*(1+skew)
 
-		outline = Polygon(top_l, top_r, bottom_r, bottom_l, color=WHITE) 
+		outline = Polygon(top_l, top_r, bottom_r, bottom_l, color=WHITE, stroke_width=1) 
 		if shadow:
 			# TODO: make shadow distance, alpha a settable param
 			shadow_box = Polygon(top_l, top_r, bottom_r, bottom_l, 
@@ -123,7 +137,7 @@ class colorMatrixSkew:
 			group = VGroup(shadow_box, outline, *sq_list)
 
 		else:
-			group = VGroup(outline, *sq_list)
+			group = VGroup(*sq_list, outline)
 		
 		# Move back to center
 		group.move_to(ORIGIN)

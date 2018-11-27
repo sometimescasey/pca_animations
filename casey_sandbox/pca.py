@@ -4,216 +4,6 @@ from casey_sandbox.colorMatrix import *
 from casey_sandbox.cov_mtx_6 import cov_mtx_6, eig_mtx_6
 import time
 
-class Shapes(Scene):
-	# Just make some simple shapes
-
-	def construct(self):
-		circle = Circle()
-		movedCircle = Circle().move_to(UP+LEFT)
-		
-		self.add(circle)
-		self.play(Transform(circle, movedCircle))
-
-class AddingText(Scene):
-	def construct(self):
-		my_first_text = TextMobject("Writing math with manim is fun")
-		second_line = TextMobject("and easy to do")
-		second_line.next_to(my_first_text, DOWN)
-		third_line = TextMobject("for me and you!")
-		third_line.next_to(my_first_text, DOWN)
-
-		self.add(my_first_text, second_line)
-		self.wait(2)
-		self.play(Transform(second_line, third_line))
-		self.wait(2)
-		self.play(ApplyMethod(second_line.to_corner, UP+LEFT), ApplyMethod(my_first_text.shift, 3*UP))
-
-class RotateAndHighlight(Scene):
-	#Rotation of text and highlighting with surrounding geometries
-	def construct(self):
-		square=Square(side_length=5,fill_color=YELLOW, fill_opacity=1)
-		label=TextMobject("Text at an angle")
-		label.bg=BackgroundRectangle(label,fill_opacity=1)
-		label_group=VGroup(label.bg,label) #Order matters
-		label_group.rotate(TAU/8)
-		label2=TextMobject("Boxed text",color=BLACK)
-		label2.bg=SurroundingRectangle(label2,color=BLUE,fill_color=RED, fill_opacity=.5)
-		label2_group=VGroup(label2,label2.bg)
-		label2_group.next_to(label_group,DOWN)
-		label3=TextMobject("Rainbow")
-		label3.scale(2)
-		label3.set_color_by_gradient(RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE)
-		label3.to_edge(DOWN)
-		 
-		self.add(square)
-		self.play(FadeIn(label_group))
-		self.play(FadeIn(label2_group))
-		self.play(FadeIn(label3))
-
-class BasicEquations(Scene):
-	# A short script showing how to use LaTeX commands
-	def construct(self):
-		eq1 = TextMobject("$\\vec{X}_0 \\cdot \\vec{Y}_1 = 3$")
-		eq1.shift(2*UP)
-
-		eq2 = TextMobject("$\\vec{F}_{net} = \\sum_i \\vec{F}_i$")
-		eq2.shift(2*DOWN)
-
-		self.play(Write(eq1))
-		self.play(Write(eq2))
-
-class ColoringEquations(Scene):
-#Grouping and coloring parts of equations
-	def construct(self):
-		line1=TexMobject("\\text{The vector }", "\\vec{F}_{net}", "\\text{ is the net }", "\\text{force on object of mass }")
-		line1.set_color_by_tex("on object of mass", BLUE)
-		line2=TexMobject("m", "\\text{ and acceleration }", "\\vec{a}", ". ")
-		line2.set_color_by_tex_to_color_map({
-		"m": YELLOW,
-		"{a}": RED,
-		"acceleration": PINK,
-		})
-		sentence=VGroup(line1,line2)
-		sentence.arrange_submobjects(DOWN, buff=MED_LARGE_BUFF)
-		self.play(Write(sentence))
-
-class UsingBraces(Scene):
-#Using braces to group text together
-	def construct(self):
-		eq1A = TextMobject("4x + 3y")
-		eq1B = TextMobject("=")
-		eq1C = TextMobject("0")
-		eq2A = TextMobject("5x -2y")
-		eq2B = TextMobject("=")
-		eq2C = TextMobject("3")
-		eq1B.next_to(eq1A,RIGHT)
-		eq1C.next_to(eq1B,RIGHT)
-		eq2A.shift(DOWN)
-		eq2B.shift(DOWN)
-		eq2C.shift(DOWN)
-		eq2A.align_to(eq1A,LEFT)
-		eq2B.align_to(eq1B,LEFT)
-		eq2C.align_to(eq1C,LEFT)
-
-		eq_group=VGroup(eq1A,eq2A)
-		braces=Brace(eq_group,LEFT)
-		eq_text = braces.get_text("A pair of equations")
-
-		self.add(eq1A, eq1B, eq1C)
-		self.add(eq2A, eq2B, eq2C)
-		self.play(GrowFromCenter(braces),Write(eq_text))
-
-class UsingBracesConcise(Scene):
-#A more concise block of code with all columns aligned
-	def construct(self):
-		eq1_text=["4","x","+","3","y","=","0"]
-		eq2_text=["5","x","-","2","y","=","3"]
-		eq1_mob=TexMobject(*eq1_text)
-		eq2_mob=TexMobject(*eq2_text)
-		eq1_mob.set_color_by_tex_to_color_map({
-		"x":RED_B,
-		"y":GREEN_C
-		})
-		eq2_mob.set_color_by_tex_to_color_map({
-		"x":RED_B,
-		"y":GREEN_C
-		})
-		for i,item in enumerate(eq2_mob):
-			item.align_to(eq1_mob[i],LEFT)
-		eq1=VGroup(*eq1_mob)
-		eq2=VGroup(*eq2_mob)
-		eq2.shift(DOWN)
-		eq_group=VGroup(eq1,eq2)
-		braces=Brace(eq_group,LEFT)
-		eq_text = braces.get_text("A pair of equations")
-
-		self.play(Write(eq1),Write(eq2))
-		self.play(GrowFromCenter(braces),Write(eq_text))
-
-class PlotFunctions(GraphScene):
-	CONFIG = {
-	"x_min" : -10,
-	"x_max" : 10,
-	"y_min" : -1.5,
-	"y_max" : 1.5,
-	"graph_origin" : ORIGIN ,
-	"function_color" : RED ,
-	"axes_color" : GREEN,
-	"x_labeled_nums" :range(-10,12,2),
-
-	}
-	def construct(self):
-		self.setup_axes(animate=True)
-		func_graph=self.get_graph(self.func_to_graph,self.function_color)
-		func_graph2=self.get_graph(self.func_to_graph2)
-		vert_line = self.get_vertical_line_to_graph(TAU,func_graph,color=YELLOW)
-		graph_lab = self.get_graph_label(func_graph, label = "\\cos(x)")
-		graph_lab2=self.get_graph_label(func_graph2,label = "\\sin(x)", x_val=-10, direction=UP/2)
-		two_pi = TexMobject("x = 2 \\pi")
-		label_coord = self.input_to_graph_point(TAU,func_graph)
-		two_pi.next_to(label_coord,RIGHT+UP)
-
-		self.play(ShowCreation(func_graph),ShowCreation(func_graph2))
-		self.play(ShowCreation(vert_line), ShowCreation(graph_lab), ShowCreation(graph_lab2),ShowCreation(two_pi))
-
-	def func_to_graph(self,x):
-		return np.cos(x)
-
-	def func_to_graph2(self,x):
-		return np.sin(x)
-
-class ExampleApproximation(GraphScene):
-	CONFIG = {
-	"function" : lambda x : np.cos(x),
-	"function_color" : BLUE,
-	"taylor" : [lambda x: 1, lambda x: 1-x**2/2, lambda x: 1-x**2/math.factorial(2)+x**4/math.factorial(4), lambda x: 1-x**2/2+x**4/math.factorial(4)-x**6/math.factorial(6),
-	lambda x: 1-x**2/math.factorial(2)+x**4/math.factorial(4)-x**6/math.factorial(6)+x**8/math.factorial(8), lambda x: 1-x**2/math.factorial(2)+x**4/math.factorial(4)-x**6/math.factorial(6)+x**8/math.factorial(8) - x**10/math.factorial(10)],
-	"center_point" : 0,
-	"approximation_color" : GREEN,
-	"x_min" : -10,
-	"x_max" : 10,
-	"y_min" : -1,
-	"y_max" : 1,
-	"graph_origin" : ORIGIN ,
-	"x_labeled_nums" :range(-10,12,2),
-
-	}
-	def construct(self):
-		self.setup_axes(animate=True)
-		func_graph = self.get_graph(
-		self.function,
-		self.function_color,
-		)
-		approx_graphs = [
-		self.get_graph(
-		f,
-		self.approximation_color
-		)
-		for f in self.taylor
-		]
-
-		term_num = [
-		TexMobject("n = " + str(n),aligned_edge=TOP)
-		for n in range(0,8)]
-		[t.to_edge(BOTTOM,buff=SMALL_BUFF) for t in term_num]
-
-		term = TexMobject("")
-		term.to_edge(BOTTOM,buff=SMALL_BUFF)
-
-		approx_graph = VectorizedPoint(
-		self.input_to_graph_point(self.center_point, func_graph)
-		)
-
-		self.play(
-		ShowCreation(func_graph),
-		)
-		for n,graph in enumerate(approx_graphs):
-			self.play(
-			Transform(approx_graph, graph, run_time = 2),
-			Transform(term,term_num[n])
-			)
-			self.wait()
-
 class ExampleThreeD(ThreeDScene):
 	CONFIG = {
 	"plane_kwargs" : {
@@ -275,9 +65,9 @@ class TestMatrix(Scene):
 		self.wait(1)
 		mtx = np.asarray([[1,0,1],[0.5,1,2],[3,4,5]])
 		mtx_flat = np.asarray([[1,0,1],[0.5,1,2],[3,4,5]]).reshape(9,1)
-		matrix_group = colorMatrix(mtx, text_scale=0.5, no_text=False).mtx().shift(2*LEFT)
-		matrix_group2 = colorMatrix(mtx_flat, text_scale=0.5, no_text=False).mtx().shift(4*LEFT)
-		matrix_group3 = colorMatrix(mtx, text_scale=0.5, no_text=False).mtx().shift(2*LEFT)
+		matrix_group = ColorMatrix(mtx, text_scale=0.5, no_text=False).mtx().shift(2*LEFT)
+		matrix_group2 = ColorMatrix(mtx_flat, text_scale=0.5, no_text=False).mtx().shift(4*LEFT)
+		matrix_group3 = ColorMatrix(mtx, text_scale=0.5, no_text=False).mtx().shift(2*LEFT)
 
 		self.add(matrix_group)
 		self.wait(1)
@@ -431,19 +221,19 @@ class Intro(Scene):
 
 			# Normal version
 			bg_img_np = imgToMtx("casey_sandbox/scenes/1_intro/assets/tiny/" + str(j) + ".0_" + str(i) +".png")
-			mtx_l = colorMatrix(bg_img_np, no_text=True).mtx()
+			mtx_l = ColorMatrix(bg_img_np, no_text=True).mtx()
 			mtx_l.scale(scale*1.5)
 			mtx_l.shift(UP*i*0.7)
 			
 			# Stack version
-			mtx = colorMatrixSkew(bg_img_np, shadow=True).mtx()
+			mtx = ColorMatrixSkew(bg_img_np, shadow=True).mtx()
 			mtx.scale(scale)
 			mtx.shift(UP*i*0.3)
 
 			# Flat version
 			dim = bg_img_np.shape[0]
 			bg_img_np_flat = bg_img_np.reshape((dim*dim,1))
-			mtx_f = colorMatrixSkew(bg_img_np_flat, shadow=True).mtx()
+			mtx_f = ColorMatrixSkew(bg_img_np_flat, shadow=True).mtx()
 			mtx_f.scale(scale)
 			mtx_f.shift(UP*i*0.3)
 
@@ -483,19 +273,19 @@ class SixStack(Scene):
 
 			# Normal version
 			bg_img_np = imgToMtx("casey_sandbox/scenes/1_intro/assets/tiny/" + str(j) + ".0_" + str(i) +".png")
-			mtx_l = colorMatrix(bg_img_np, no_text=True).mtx()
+			mtx_l = ColorMatrix(bg_img_np, no_text=True).mtx()
 			mtx_l.scale(scale*1.5)
 			mtx_l.shift(UP*i*0.7)
 			
 			# Stack version
-			mtx = colorMatrixSkew(bg_img_np, shadow=True).mtx()
+			mtx = ColorMatrixSkew(bg_img_np, shadow=True).mtx()
 			mtx.scale(scale)
 			mtx.shift(UP*i*0.3)
 
 			# Flat version
 			dim = bg_img_np.shape[0]
 			bg_img_np_flat = bg_img_np.reshape((dim*dim,1))
-			mtx_f = colorMatrixSkew(bg_img_np_flat, shadow=True).mtx()
+			mtx_f = ColorMatrixSkew(bg_img_np_flat, shadow=True).mtx()
 			mtx_f.scale(scale)
 			mtx_f.shift(UP*i*0.3)
 
@@ -525,7 +315,7 @@ class SixStack(Scene):
 		cov_arrow = Arrow([-1.7,0,0],[0.5,0,0], color=WHITE, stroke_width=5)
     
 		cov_np = np.array(cov_mtx_6) # imported from cov_mtx_6.py for keeping things clean
-		cov_mtx = colorMatrix(cov_np, no_text=True, norm_colors=True).mtx().shift(RIGHT*3)
+		cov_mtx = ColorMatrix(cov_np, no_text=True, norm_colors=True).mtx().shift(RIGHT*3)
 		cov_mtx.scale(0.07)
 
 		cov_label = TextMobject("64 $\\times$ 64\\\covariance matrix").shift(RIGHT*3)
@@ -546,7 +336,7 @@ class SixStack(Scene):
 		eig_arrow = Arrow([-0.6,0,0],[0.6,0,0], color=WHITE, stroke_width=5)
 
 		eig_np = np.array(eig_mtx_6) # imported from cov_mtx_6.py for keeping things clean
-		eig_mtx = colorMatrix(eig_np, no_text=True, norm_colors=True).mtx().shift(RIGHT*3)
+		eig_mtx = ColorMatrix(eig_np, no_text=True, norm_colors=True).mtx().shift(RIGHT*3)
 		eig_mtx.scale(0.07)
 
 		eig_label = TextMobject("64 unit eigenvectors").shift(RIGHT*3+UP*0.2)
@@ -571,7 +361,7 @@ class SixStack(Scene):
 class GetTopEig(Scene):
 	def construct(self):
 		eig_np = np.array(eig_mtx_6) # imported from cov_mtx_6.py for keeping things clean
-		eig_mtx = colorMatrix(eig_np, no_text=True, norm_colors=True).mtx()
+		eig_mtx = ColorMatrix(eig_np, no_text=True, norm_colors=True).mtx()
 		eig_mtx.scale(0.07)
 
 		eig_label = TextMobject("64 unit eigenvectors").shift(UP*0.2)
@@ -619,7 +409,7 @@ class GetTopEig(Scene):
 		self.remove(*overlay)
 		top_eig_np = eig_np[:,0:5]
 		new_pos = (eig_group.get_corner(TOP+LEFT)+eig_group.get_corner(BOTTOM+LEFT))/2 + RIGHT*0.18
-		top_eig_mtx = colorMatrix(top_eig_np, no_text=True, norm_colors=True).mtx().move_to(new_pos)
+		top_eig_mtx = ColorMatrix(top_eig_np, no_text=True, norm_colors=True).mtx().move_to(new_pos)
 		top_eig_mtx.scale(0.07)
 		a = top_eig_mtx.get_corner(TOP+LEFT)
 		b = top_eig_mtx.get_corner(TOP+RIGHT)
@@ -635,19 +425,28 @@ class GetTopEig(Scene):
 		n_b_group = VGroup(new_basis_text, new_basis_text2, new_basis_text3)
 		n_b_group.shift(RIGHT*0.1)
 		self.add(n_b_group)
-		self.wait()
+		self.wait(2)
 
 class PrincipalComponents(Scene):
 	def construct(self):
-		k = 5
+		k = 7
 
 		eig_np = np.array(eig_mtx_6) # imported from cov_mtx_6.py for keeping things clean
 		top_eig_np = eig_np[:,0:k]
-		top_eig_mtx1 = colorMatrix(top_eig_np, no_text=True, norm_colors=True).mtx().move_to(ORIGIN)
-		top_eig_mtx2 = colorMatrix(top_eig_np, no_text=True, norm_colors=True).mtx().move_to(ORIGIN)
+		top_eig_five = eig_np[:,0:5]
+		
+		top_eig_mtx1 = ColorMatrix(top_eig_np, no_text=True, norm_colors=True).mtx().move_to(ORIGIN)
+		top_eig_mtx2 = ColorMatrix(top_eig_np, no_text=True, norm_colors=True).mtx().move_to(ORIGIN)
+		top_eig_mtx3 = ColorMatrix(top_eig_np, no_text=True, norm_colors=True).mtx().move_to(ORIGIN)
+
+		top_eig_mtx = ColorMatrix(top_eig_five, no_text=True, norm_colors=True).mtx().move_to(ORIGIN)
+		
 		top_eig_mtx1.scale(0.07)
 		top_eig_mtx2.scale(0.07)
-		top_eig_mtx = top_eig_mtx1
+		top_eig_mtx3.scale(0.07)
+		top_eig_mtx.scale(0.07)
+		
+
 		a = top_eig_mtx.get_corner(TOP+LEFT)
 		b = top_eig_mtx.get_corner(TOP+RIGHT)
 		c = top_eig_mtx.get_corner(BOTTOM+RIGHT)
@@ -661,18 +460,25 @@ class PrincipalComponents(Scene):
 
 		e = [None]*k
 		e2 = [None]*k
+		e3 = [None]*k
+		
 		f = [None]*k
 		f2 = [None]*k
+		f3 = [None]*k
+
 		shape = eig_np.shape[0]
 		for i in range(k):
 			col_list1 = [None] * 64
 			col_list2 = [None] * 64
+			col_list3 = [None] * 64
 			for j in range(64):
 				col_list1[j] = top_eig_mtx1[0+(j)*k+i]
 				col_list2[j] = top_eig_mtx2[0+(j)*k+i]
+				col_list3[j] = top_eig_mtx3[0+(j)*k+i]
 				print("Putting idx {} in col {}".format(0+(j)*k, i))
 			e[i] = VGroup(*col_list1)
 			e2[i] = VGroup(*col_list2)
+			e3[i] = VGroup(*col_list3)
 			
 			a = e[i].get_corner(TOP+LEFT)
 			b = e[i].get_corner(TOP+RIGHT)
@@ -683,32 +489,113 @@ class PrincipalComponents(Scene):
 			b2 = e2[i].get_corner(TOP+RIGHT)
 			c2 = e2[i].get_corner(BOTTOM+RIGHT)
 			d2 = e2[i].get_corner(BOTTOM+LEFT)
+
+			a3 = e3[i].get_corner(TOP+LEFT)
+			b3 = e3[i].get_corner(TOP+RIGHT)
+			c3 = e3[i].get_corner(BOTTOM+RIGHT)
+			d3 = e3[i].get_corner(BOTTOM+LEFT)
 			
 			overlay = Polygon(a,b,c,d, fill_color=BRIGHT_RED, fill_opacity=0.5, stroke_width=0)
 			overlay2 = Polygon(a2,b2,c2,d2, fill_color=BRIGHT_RED, fill_opacity=0.5, stroke_width=0)
+			overlay3 = Polygon(a3,b3,c3,d3, fill_color=BRIGHT_RED, fill_opacity=0.5, stroke_width=0)
+
 			f[i] = VGroup(e[i], overlay)
 			f2[i] = VGroup(e2[i], overlay2)
+			f3[i] = VGroup(e3[i], overlay3)
+
 			f2[i].shift(RIGHT*(i-(k-1)/2))
 
-		togeth = VGroup(*f2)
-		split_apart = VGroup(*f)
+		split_apart = VGroup(*f2)
+		first_five = VGroup(f2[0], f2[1], f2[2], f2[3], f2[4])
+		togeth = VGroup(*f)
 
 		pc_text = TextMobject("Principal Components", color=BRIGHT_RED).move_to(TOP).shift(DOWN)
 		
+		split_apart.shift(RIGHT)
 		self.wait()
 		self.remove(top_eig_group)
-		self.play(Transform(f[0], f2[0]), 
-			Transform(f[1], f2[1]), 
-			Transform(f[2], f2[2]), 
-			Transform(f[3], f2[3]), 
-			Transform(f[4], f2[4]))
+		self.play(
+			ReplacementTransform(f[0], f2[0]),
+			ReplacementTransform(f[1], f2[1]), 
+			ReplacementTransform(f[2], f2[2]), 
+			ReplacementTransform(f[3], f2[3]), 
+			ReplacementTransform(f[4], f2[4]))
 
 		self.wait()
 		self.add(pc_text)
 		self.wait()
+		self.play(FadeIn(f2[5]), FadeIn(f2[6]), ApplyMethod(split_apart.shift, LEFT))
+		self.wait()
+		self.play(FadeOut(f2[3]), FadeOut(f2[4]), FadeOut(f2[5]), FadeOut(f2[6]), 
+			ApplyMethod(split_apart.shift, RIGHT*2))
+		self.wait(2)
+		self.play(FadeIn(f2[3]), FadeIn(f2[4]))
+		self.play(ApplyMethod(first_five.shift, LEFT))
+
+		self.wait(2)
+
+		self.play(
+			ReplacementTransform(f2[0], f3[0]),
+			ReplacementTransform(f2[1], f3[1]), 
+			ReplacementTransform(f2[2], f3[2]), 
+			ReplacementTransform(f2[3], f3[3]), 
+			ReplacementTransform(f2[4], f3[4]))
+
+		
+		self.remove(*f3)
+		self.add(top_eig_group)
+		self.remove(top_eig_group[1])
+		self.wait(2)
 			
 
+class ProjectionOntoBasis(Scene):
+	def construct(self):
+		eig_np = np.array(eig_mtx_6) # imported from cov_mtx_6.py for keeping things clean
+		top_eig_np = eig_np[:,0:5]
 
+		top_eig_mtx = ColorMatrix(top_eig_np, no_text=True, norm_colors=True).mtx().move_to(ORIGIN)
+		
+		top_eig_mtx.scale(0.07)
+		
+
+		# a = top_eig_mtx.get_corner(TOP+LEFT)
+		# b = top_eig_mtx.get_corner(TOP+RIGHT)
+		# c = top_eig_mtx.get_corner(BOTTOM+RIGHT)
+		# d = top_eig_mtx.get_corner(BOTTOM+LEFT)
+		# top_eig_overlay = Polygon(a,b,c,d, fill_color=BRIGHT_RED, fill_opacity=0.5, stroke_width=0)
+		
+		self.add(top_eig_mtx)
+		self.wait()
+
+		eig_np = np.array(eig_mtx_6) # imported from cov_mtx_6.py for keeping things clean
+		top_eig_np_T = eig_np[:,0:5].T
+
+		top_eig_t = ColorMatrix(top_eig_np_T, no_text=True, norm_colors=True).mtx()
+		top_eig_t.scale(0.07)
+		top_eig_t.shift(UP+LEFT*2)
+
+		self.play(ClockwiseTransform(top_eig_mtx, top_eig_t))
+		self.remove(top_eig_mtx)
+		self.play(ApplyMethod(top_eig_t.shift, LEFT*1.5+UP))
+		self.wait()
+
+		# Add image of a 6
+		# Normal version
+		img_np = imgToMtx("casey_sandbox/scenes/1_intro/assets/tiny/" + str(6) + ".0_" + str(0) +".png")
+		img_np_f = img_np.reshape((img_np.shape[0]**2, 1))
+		
+		six_mtx = ColorMatrix(img_np, no_text=True).mtx()
+		six_mtx.scale(0.07)
+		
+		six_mtx_f = ColorMatrix(img_np_f, no_text=True).mtx()
+		six_mtx_f.scale(0.07)
+
+		self.add(six_mtx)
+		self.wait()
+		self.play(ReplacementTransform(six_mtx, six_mtx_f))
+		self.play(ApplyMethod(six_mtx_f.shift, LEFT*0.5))
+
+		self.wait()
 
 
 
@@ -731,13 +618,13 @@ class TestMatrixSkew(Scene):
 		#mtx = np.asarray([[1,0,1],[0.5,1,2],[3,4,5]])
 		#mtx_flat = np.asarray([[1,0,1],[0.5,1,2],[3,4,5]]).reshape(9,1)
 		
-		matrix_group = colorMatrix(mtx, no_text=True, tint='R').mtx().shift(2*LEFT)
+		matrix_group = ColorMatrix(mtx, no_text=True, tint='R').mtx().shift(2*LEFT)
 		matrix_group.scale(0.2)
 
-		matrix_group_skew = colorMatrixSkew(mtx).mtx().shift(2*LEFT)
+		matrix_group_skew = ColorMatrixSkew(mtx).mtx().shift(2*LEFT)
 		matrix_group_skew.scale(0.1)
 		
-		matrix_group2 = colorMatrix(mtx, no_text=True).mtx().shift(2*LEFT)
+		matrix_group2 = ColorMatrix(mtx, no_text=True).mtx().shift(2*LEFT)
 		matrix_group2.scale(0.2)
 
 

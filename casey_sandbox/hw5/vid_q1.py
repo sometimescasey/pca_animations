@@ -123,6 +123,11 @@ def plot_eigenvectors(covariances):
 		eigenvalues, _eigenvectors = np.linalg.eig(covariances[k])
 		eigenvectors = _eigenvectors.T
 
+		if (k==6):
+			np.set_printoptions(threshold=np.nan, precision=2)
+			with open("six_eig.txt", "w") as text_file:
+				text_file.write(repr(eigenvectors))
+
 		biggest_index = eigenvalues.argmax() # should be the first one, but just in case
 
 		reshaped = np.asarray(np.reshape(eigenvectors[biggest_index], (8, 8)))
