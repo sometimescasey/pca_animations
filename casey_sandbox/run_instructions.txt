@@ -1,7 +1,20 @@
 1) Set media_dir.txt in whatever CWD you're running the script from
 2) Source activate manim (conda env)
-3) python extract_scene.py casey_sandbox/manim_tutorial_1.py Intro -pl
+3) python extract_scene.py casey_sandbox/manim_tutorial_1.py Intro -pl -g
+ 
+Add -g to save pngs
 
+Convert folder of pngs to gif: 
+convert -delay 8 -loop 0 *.png myimage.gif
+
+Cropping:
+convert myimage.gif -coalesce -repage 0x0 -crop 100x100+100+100 +repage output.gif
+
+Optimizing frames:
+convert  output.gif -coalesce  -layers OptimizeFrame  optframe_bgnd.gif
+
+
+WxH+X+Y
 
 All colors are defined in constants.py. Use as following:
 "RED_E" becomes six_box = RoundedRectangle(color=GREEN_E, height=5.8, width=1, corner_radius=0.2)
@@ -11,3 +24,5 @@ FadeIn, FadeOut, creation animations are in animation/creation.py
 Transformations between two items in animation/transform.py
 
 Properties of items (color, stroke_width): look in mobject/geometry.py
+
+Probabilistic Learning and Reasoning

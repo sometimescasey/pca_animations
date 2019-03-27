@@ -2,7 +2,10 @@ from big_ol_pile_of_manim_imports import *
 from once_useful_constructs.matrix_multiplication import *
 from casey_sandbox.colorMatrix import *
 from casey_sandbox.cov_mtx_6 import cov_mtx_6, eig_mtx_6
+from casey_sandbox.miscParts import *
 import time
+
+import os
 
 class Shapes(Scene):
 	# Just make some simple shapes
@@ -286,6 +289,26 @@ class TestMatrix(Scene):
 		self.play(Transform(matrix_group2, matrix_group3))
 		self.wait()
 
+class Black_to_white(Scene):
+	def construct(self):
+		## Each pixel can range from 0 for white to 1 for black
+		# -------------------
+		zero = TextMobject("0")
+		to = TextMobject("to").next_to(zero)
+		one = TextMobject("1", background_stroke_color=WHITE, color=BLACK).next_to(to)
+		# to.set_color_by_gradient(WHITE, BLACK)
+		rect_1 = Rectangle(width=0.15, height=0.15, fill_color=WHITE, fill_opacity=1).next_to(zero).shift(UP*0.5+LEFT*0.42)
+		rect_2 = Rectangle(width=0.2, height=0.2, fill_color=BLACK, 
+			fill_opacity=1, background_stroke_color=WHITE, 
+			stroke_width=2).next_to(zero).shift(UP*0.5+RIGHT*0.64)
+		arrow = Arrow(start=zero, end=one)
+		
+		zero_to_one = VGroup(zero, arrow, rect_1, one)
+		self.add(zero_to_one)
+		self.wait(1)
+		self.play(Transform(rect_1, rect_2))
+		self.wait(2)
+
 class Intro(Scene):
 	def construct(self):
 		# Title
@@ -483,19 +506,19 @@ class SixStack(Scene):
 
 			# Normal version
 			bg_img_np = imgToMtx("casey_sandbox/scenes/1_intro/assets/tiny/" + str(j) + ".0_" + str(i) +".png")
-			mtx_l = colorMatrix(bg_img_np, no_text=True).mtx()
+			mtx_l = ColorMatrix(bg_img_np, no_text=True).mtx()
 			mtx_l.scale(scale*1.5)
 			mtx_l.shift(UP*i*0.7)
 			
 			# Stack version
-			mtx = colorMatrixSkew(bg_img_np, shadow=True).mtx()
+			mtx = ColorMatrixSkew(bg_img_np, shadow=True).mtx()
 			mtx.scale(scale)
 			mtx.shift(UP*i*0.3)
 
 			# Flat version
 			dim = bg_img_np.shape[0]
 			bg_img_np_flat = bg_img_np.reshape((dim*dim,1))
-			mtx_f = colorMatrixSkew(bg_img_np_flat, shadow=True).mtx()
+			mtx_f = ColorMatrixSkew(bg_img_np_flat, shadow=True).mtx()
 			mtx_f.scale(scale)
 			mtx_f.shift(UP*i*0.3)
 
@@ -525,7 +548,7 @@ class SixStack(Scene):
 		cov_arrow = Arrow([-1.7,0,0],[0.5,0,0], color=WHITE, stroke_width=5)
     
 		cov_np = np.array(cov_mtx_6) # imported from cov_mtx_6.py for keeping things clean
-		cov_mtx = colorMatrix(cov_np, no_text=True, norm_colors=True).mtx().shift(RIGHT*3)
+		cov_mtx = ColorMatrix(cov_np, no_text=True, norm_colors=True).mtx().shift(RIGHT*3)
 		cov_mtx.scale(0.07)
 
 		cov_label = TextMobject("64 $\\times$ 64\\\covariance matrix").shift(RIGHT*3)
@@ -546,7 +569,7 @@ class SixStack(Scene):
 		eig_arrow = Arrow([-0.6,0,0],[0.6,0,0], color=WHITE, stroke_width=5)
 
 		eig_np = np.array(eig_mtx_6) # imported from cov_mtx_6.py for keeping things clean
-		eig_mtx = colorMatrix(eig_np, no_text=True, norm_colors=True).mtx().shift(RIGHT*3)
+		eig_mtx = ColorMatrix(eig_np, no_text=True, norm_colors=True).mtx().shift(RIGHT*3)
 		eig_mtx.scale(0.07)
 
 		eig_label = TextMobject("64 unit eigenvectors").shift(RIGHT*3+UP*0.2)
@@ -767,3 +790,352 @@ class TestVGroup(Scene):
 		self.play(Transform(group[0], rect3))
 
 		self.wait()
+
+class Square_to_vec(Scene):
+	# python extract_scene.py casey_sandbox/manim_tutorial_1.py Square_to_vec -pl -g
+	# convert -delay 7 -loop 0 *.png myimage.gif
+	# convert myimage.gif -coalesce -repage 0x0 -crop 550x100+120+190 +repage output.gif
+	def construct(self):
+
+		text = TextMobject("X = ", color=WHITE).move_to(LEFT*3.9).shift(UP*0.02)
+
+		j = 2
+		i = 7
+		bg_img = "casey_sandbox/scenes/1_intro/assets/tiny/" + str(j) + ".0_" + str(i) +".png"
+		mtx = imgToMtx(bg_img)
+
+		mtx_1 = mtx.reshape((1,-1))
+
+		matrix_group = ColorMatrix(mtx, no_text=True, tint='None').mtx()
+		matrix_group.scale(0.1)
+
+		# matrix_group2 = matrix_group
+
+		self.add(matrix_group)
+		self.wait(1)
+
+		# matrix_group_skew = ColorMatrixSkew(mtx).mtx().shift(2*LEFT)
+		# matrix_group_skew.scale(0.1)
+
+		matrix_group2 = ColorMatrix(mtx_1, no_text=True, tint='None').mtx()
+		matrix_group2.scale(0.1)
+
+		self.play(ReplacementTransform(matrix_group, matrix_group2))
+		self.add(text)
+		self.wait(3)
+
+class TwoStack(Scene):
+	# python extract_scene.py casey_sandbox/manim_tutorial_1.py TwoStack -pl -g
+	# convert -delay 7 -loop 0 *.png myimage.gif
+	# convert myimage.gif -coalesce -repage 0x0 -crop 420x440+175+10 +repage output.gif
+
+	def construct(self):
+
+		scale = 0.05
+		stack_h = 10
+
+		six_l = [None] * stack_h # Normal square
+		six = [None] * stack_h # Stack
+		six_f = [None] * stack_h # Flattened stack
+
+		digit_choice = 2
+
+		count = 0
+		for i in range(0,stack_h):
+			j = digit_choice
+
+			# Normal version
+			bg_img_np = imgToMtx("casey_sandbox/scenes/1_intro/assets/tiny/" + str(j) + ".0_" + str(i) +".png")
+			mtx_l = ColorMatrix(bg_img_np, no_text=True).mtx()
+			mtx_l.scale(scale*1.5)
+			mtx_l.shift(UP*i*0.7)
+			
+			# Stack version
+			mtx = ColorMatrixSkew(bg_img_np, shadow=True).mtx()
+			mtx.scale(scale)
+			mtx.shift(UP*i*0.3)
+
+			# Flat version
+			dim = bg_img_np.shape[0]
+			bg_img_np_flat = bg_img_np.reshape((dim*dim,1))
+			mtx_f = ColorMatrixSkew(bg_img_np_flat, shadow=True).mtx()
+			mtx_f.scale(scale)
+			mtx_f.shift(UP*i*0.3)
+
+			six_l[i] = mtx_l
+			six[i] = mtx
+			six_f[i] = mtx_f
+
+		six_list = VGroup(*six_l)
+		six_list.shift(DOWN*3)
+		
+		stack = VGroup(*six)
+		stack.shift(DOWN*1.5)
+		
+		stack_f = VGroup(*six_f)
+		stack_f.shift(DOWN*1.5)
+		
+		self.add(six_list)
+		self.wait(1)
+		self.play(ReplacementTransform(six_list, stack))
+		self.wait(1)
+		self.play(ReplacementTransform(stack, stack_f))
+		self.wait()
+
+		self.play(ApplyMethod(stack_f.shift,2*LEFT))
+		self.wait()
+
+
+		D_sq = DoubleArrow([-3.6,3.5,0],[0.0,0,0], color=YELLOW)
+		D_sq_text = TextMobject("$D^2$: number of pixels", color=YELLOW).move_to(0).shift(RIGHT*0.7+UP*1.8)
+		D_sq_text.scale(0.8)
+		
+		D_group = VGroup(D_sq, D_sq_text)
+		self.play(FadeIn(D_group))
+		self.wait()
+		self.play(FadeOut(D_group))
+
+		N = DoubleArrow([0.2,-0.3,0],[0.2,-3.3,0], color=YELLOW)
+		N_text = TextMobject("$N$: number of images", color=YELLOW).move_to(0).shift(RIGHT*2.5+DOWN*2)
+		N_text.scale(0.8)
+		
+		N_group = VGroup(N, N_text)
+		self.play(FadeIn(N_group))
+		self.wait()
+		self.play(FadeOut(N_group))
+		self.wait()
+
+class Two_stack_collapse(Scene):
+	# python extract_scene.py casey_sandbox/manim_tutorial_1.py Two_stack_collapse -pl -g
+
+	# conversion should speed up alot
+
+	# convert -delay 7 -loop 0 *.png myimage.gif
+	# convert myimage.gif -coalesce -repage 0x0 -crop 390x475+170+0 +repage output.gif
+
+	def construct(self):
+
+		HOF = 1 # height offset
+
+		scale = 0.05
+		stack_h = 10
+
+		six_l = [None] * stack_h # Normal square
+		six = [None] * stack_h # Stack
+		six_f = [None] * stack_h # Flattened stack
+
+		digit_choice = 2
+
+		count = 0
+		imgs_flat = []
+		for i in range(0,stack_h):
+			j = digit_choice
+
+			# Normal version
+			bg_img_np = imgToMtx("casey_sandbox/scenes/1_intro/assets/tiny/" + str(j) + ".0_" + str(i) +".png")
+			mtx_l = ColorMatrix(bg_img_np, no_text=True).mtx()
+			mtx_l.scale(scale*1.5)
+			mtx_l.shift(UP*i*0.7)
+			
+			# Stack version
+			mtx = ColorMatrixSkew(bg_img_np, shadow=False).mtx()
+			mtx.scale(scale)
+			mtx.shift(UP*i*0.3)
+
+			# Flat version
+			dim = bg_img_np.shape[0]
+			bg_img_np_flat = bg_img_np.reshape((dim*dim,1))
+			imgs_flat.append(bg_img_np_flat)
+			
+			mtx_f = ColorMatrixSkew(bg_img_np_flat, shadow=False).mtx()
+			mtx_f.scale(scale)
+			mtx_f.shift(UP*i*0.3)
+
+			six_l[i] = mtx_l
+			six[i] = mtx
+			six_f[i] = mtx_f
+
+		six_list = VGroup(*six_l)
+		six_list.shift(DOWN*3)
+		
+		stack = VGroup(*six)
+		stack.shift(DOWN*1.5)
+		
+		stack_f = VGroup(*six_f)
+		stack_f.shift(DOWN*HOF)
+		
+		# self.add(stack_f)
+		# self.wait()
+
+		pixel_col = [None] * (dim*dim)
+		pixel_col_groups = [None] * (dim*dim)
+
+		for j in range(0, dim*dim):
+			pixel_col[j] = []
+			for i in range(0, stack_h):
+				pixel_col[j].append(six_f[i][j])
+
+			pixel_col_groups[j] = VGroup(*pixel_col[j])
+
+		all_group = VGroup(*pixel_col_groups)
+		self.add(all_group)
+
+		cb_text = TextMobject("$\\mathbf{X} =$")
+		cb_text.shift(UP*(3-HOF)+LEFT*3.3)
+
+		cb = CurlyBrace().brace()
+		cb.scale(0.5)
+		cb.rescale_to_fit(3,1,stretch=True)
+		cb.shift(UP*(1.5+2.7-HOF)+LEFT*2.2)
+		
+		cb_group = VGroup(cb_text, cb)
+		
+		self.add(cb_group)
+		self.wait(1)
+
+		means = np.mean(imgs_flat, axis=0)
+		mean_skew = ColorMatrixSkew(means, shadow=False).mtx()
+		mean_skew.scale(scale)
+		mean_skew.shift(DOWN*(1+HOF))
+
+
+		# for j in range(0,1):
+		# for j in range(dim*dim-1,dim*dim):
+		#for j in range(0, dim*dim):
+		mu_text = TextMobject("$\\mu_X =$")
+		mu_text.shift(DOWN*(1.5-HOF)+LEFT*2.5)
+		self.play(FadeOut(cb_group))
+		self.play(FadeIn(mu_text), Transform(all_group, mean_skew))
+		
+		
+		self.wait(2)
+
+class mu_one(Scene):
+	# python extract_scene.py casey_sandbox/manim_tutorial_1.py Two_stack_collapse -pl -g
+
+
+	# convert -delay 7 -loop 0 *.png myimage.gif
+	# convert myimage.gif -coalesce -repage 0x0 -crop 420x440+175+10 +repage output.gif
+
+	def construct(self):
+
+		HOF = 1 # height offset
+
+		scale = 0.05
+		stack_h = 10
+
+		six_l = [None] * stack_h # Normal square
+		six = [None] * stack_h # Stack
+		six_f = [None] * stack_h # Flattened stack
+
+		digit_choice = 2
+
+		count = 0
+		imgs_flat = []
+		for i in range(0,stack_h):
+			j = digit_choice
+
+			# Normal version
+			bg_img_np = imgToMtx("casey_sandbox/scenes/1_intro/assets/tiny/" + str(j) + ".0_" + str(i) +".png")
+			mtx_l = ColorMatrix(bg_img_np, no_text=True).mtx()
+			mtx_l.scale(scale*1.5)
+			mtx_l.shift(UP*i*0.7)
+			
+			# Stack version
+			mtx = ColorMatrixSkew(bg_img_np, shadow=False).mtx()
+			mtx.scale(scale)
+			mtx.shift(UP*i*0.3)
+
+			# Flat version
+			dim = bg_img_np.shape[0]
+			bg_img_np_flat = bg_img_np.reshape((dim*dim,1))
+			imgs_flat.append(bg_img_np_flat)
+			
+			mtx_f = ColorMatrixSkew(bg_img_np_flat, shadow=False).mtx()
+			mtx_f.scale(scale)
+			mtx_f.shift(UP*i*0.3)
+
+			six_l[i] = mtx_l
+			six[i] = mtx
+			six_f[i] = mtx_f
+
+		six_list = VGroup(*six_l)
+		six_list.shift(DOWN*3)
+		
+		stack = VGroup(*six)
+		stack.shift(DOWN*1.5)
+		
+		stack_f = VGroup(*six_f)
+		stack_f.shift(DOWN*HOF)
+		
+		# self.add(stack_f)
+		# self.wait()
+
+		pixel_col = [None] * (dim*dim)
+		pixel_col_groups = [None] * (dim*dim)
+
+		for j in range(0, dim*dim):
+			pixel_col[j] = []
+			for i in range(0, stack_h):
+				pixel_col[j].append(six_f[i][j])
+
+			pixel_col_groups[j] = VGroup(*pixel_col[j])
+
+		self.add(*pixel_col_groups)
+
+		cb_text = TextMobject("$\\mathbf{X} =$")
+		cb_text.shift(UP*(3-HOF)+LEFT*3.3)
+
+		cb = CurlyBrace().brace()
+		cb.scale(0.5)
+		cb.rescale_to_fit(3,1,stretch=True)
+		cb.shift(UP*(1.5+2.7-HOF)+LEFT*2.2)
+		
+		cb_group = VGroup(cb_text, cb)
+		
+		self.add(cb_group)
+		self.wait(1)
+
+		means = np.mean(imgs_flat, axis=0)
+		mean_skew = ColorMatrixSkew(means, shadow=False).mtx()
+		mean_skew.scale(scale)
+		mean_skew.shift(DOWN*(1+HOF))
+
+
+		
+		# self.play(FadeOut(cb_group))
+
+		for j in range(0,dim*dim):
+			if j >= 3 and j <= 62:
+				continue
+
+			mu_text = TextMobject("$E\\left[X_{%s}\\right]$" % str(j+1))
+			
+			if j == 63:
+				arrow = Arrow(DOWN*(4-HOF)+RIGHT*0.3, DOWN*3.6+RIGHT*1.5, color=WHITE)
+				arrow.shift(offset)
+				mu_text.shift(DOWN*(4-HOF)+LEFT*0.5)
+				mu_text.shift(offset)
+			else:
+				offset = (0.07*j) * RIGHT + (0.03*j) * DOWN
+				
+				arrow = Arrow(DOWN*(2.3-HOF)+LEFT*2.4, DOWN*0.4+LEFT*1.45, color=WHITE)
+				arrow.shift(offset)
+
+				mu_text.shift(DOWN*(2.5-HOF)+LEFT*2.5)
+				mu_text.shift(offset)
+			mu_group = VGroup(mu_text, arrow)
+
+			goback = pixel_col_groups[j].deepcopy()
+
+			self.play(ReplacementTransform(pixel_col_groups[j], mean_skew[j]))
+			self.play(FadeIn(mu_group))
+			self.wait(1)
+			self.play(FadeOut(mu_group), ReplacementTransform(mean_skew[j], goback))
+			self.wait(1)
+		
+		self.wait(2)
+		
+
+
+

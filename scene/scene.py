@@ -548,7 +548,7 @@ class Scene(Container):
             for frame in frames:
                 if self.save_pngs:
                     self.save_image(
-                        "frame" + str(self.frame_num), self.pngs_mode, True)
+                        "frame" + str(self.frame_num).zfill(4), self.pngs_mode, True)
                     self.frame_num = self.frame_num + 1
                 self.writing_process.stdin.write(frame.tostring())
         if self.save_frames:

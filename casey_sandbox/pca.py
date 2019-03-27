@@ -409,13 +409,13 @@ class GetTopEig(Scene):
 		self.remove(*overlay)
 		top_eig_np = eig_np[:,0:5]
 		new_pos = (eig_group.get_corner(TOP+LEFT)+eig_group.get_corner(BOTTOM+LEFT))/2 + RIGHT*0.18
-		top_eig_mtx = ColorMatrix(top_eig_np, no_text=True, norm_colors=True).mtx().move_to(new_pos)
+		top_eig_mtx = ColorMatrix(top_eig_np, no_text=True, norm_colors=True, tint='R').mtx().move_to(new_pos)
 		top_eig_mtx.scale(0.07)
 		a = top_eig_mtx.get_corner(TOP+LEFT)
 		b = top_eig_mtx.get_corner(TOP+RIGHT)
 		c = top_eig_mtx.get_corner(BOTTOM+RIGHT)
 		d = top_eig_mtx.get_corner(BOTTOM+LEFT)
-		top_eig_overlay = Polygon(a,b,c,d, fill_color=BRIGHT_RED, fill_opacity=0.5, stroke_width=0)
+		top_eig_overlay = Polygon(a,b,c,d, fill_color=BRIGHT_RED, fill_opacity=0.0, stroke_width=0)
 		top_eig_group = VGroup(top_eig_mtx, top_eig_overlay)
 		self.add(top_eig_group)
 		self.play(ApplyMethod(top_eig_group.move_to,ORIGIN))
@@ -435,11 +435,11 @@ class PrincipalComponents(Scene):
 		top_eig_np = eig_np[:,0:k]
 		top_eig_five = eig_np[:,0:5]
 		
-		top_eig_mtx1 = ColorMatrix(top_eig_np, no_text=True, norm_colors=True).mtx().move_to(ORIGIN)
-		top_eig_mtx2 = ColorMatrix(top_eig_np, no_text=True, norm_colors=True).mtx().move_to(ORIGIN)
-		top_eig_mtx3 = ColorMatrix(top_eig_np, no_text=True, norm_colors=True).mtx().move_to(ORIGIN)
+		top_eig_mtx1 = ColorMatrix(top_eig_np, no_text=True, norm_colors=True, tint='R').mtx().move_to(ORIGIN)
+		top_eig_mtx2 = ColorMatrix(top_eig_np, no_text=True, norm_colors=True, tint='R').mtx().move_to(ORIGIN)
+		top_eig_mtx3 = ColorMatrix(top_eig_np, no_text=True, norm_colors=True, tint='R').mtx().move_to(ORIGIN)
 
-		top_eig_mtx = ColorMatrix(top_eig_five, no_text=True, norm_colors=True).mtx().move_to(ORIGIN)
+		top_eig_mtx = ColorMatrix(top_eig_five, no_text=True, norm_colors=True, tint='R').mtx().move_to(ORIGIN)
 		
 		top_eig_mtx1.scale(0.07)
 		top_eig_mtx2.scale(0.07)
@@ -451,7 +451,7 @@ class PrincipalComponents(Scene):
 		b = top_eig_mtx.get_corner(TOP+RIGHT)
 		c = top_eig_mtx.get_corner(BOTTOM+RIGHT)
 		d = top_eig_mtx.get_corner(BOTTOM+LEFT)
-		top_eig_overlay = Polygon(a,b,c,d, fill_color=BRIGHT_RED, fill_opacity=0.5, stroke_width=0)
+		top_eig_overlay = Polygon(a,b,c,d, fill_color=BRIGHT_RED, fill_opacity=0.0, stroke_width=0)
 		top_eig_group = VGroup(top_eig_mtx, top_eig_overlay)
 		self.add(top_eig_group)
 		self.wait()
@@ -495,9 +495,9 @@ class PrincipalComponents(Scene):
 			c3 = e3[i].get_corner(BOTTOM+RIGHT)
 			d3 = e3[i].get_corner(BOTTOM+LEFT)
 			
-			overlay = Polygon(a,b,c,d, fill_color=BRIGHT_RED, fill_opacity=0.5, stroke_width=0)
-			overlay2 = Polygon(a2,b2,c2,d2, fill_color=BRIGHT_RED, fill_opacity=0.5, stroke_width=0)
-			overlay3 = Polygon(a3,b3,c3,d3, fill_color=BRIGHT_RED, fill_opacity=0.5, stroke_width=0)
+			overlay = Polygon(a,b,c,d, fill_color=BRIGHT_RED, fill_opacity=0.0, stroke_width=0)
+			overlay2 = Polygon(a2,b2,c2,d2, fill_color=BRIGHT_RED, fill_opacity=0.0, stroke_width=0)
+			overlay3 = Polygon(a3,b3,c3,d3, fill_color=BRIGHT_RED, fill_opacity=0.0, stroke_width=0)
 
 			f[i] = VGroup(e[i], overlay)
 			f2[i] = VGroup(e2[i], overlay2)
@@ -507,7 +507,8 @@ class PrincipalComponents(Scene):
 
 		split_apart = VGroup(*f2)
 		first_five = VGroup(f2[0], f2[1], f2[2], f2[3], f2[4])
-		togeth = VGroup(*f)
+		togeth = VGroup(*f3)
+		togeth.shift(RIGHT*0.1)
 
 		pc_text = TextMobject("Principal Components", color=BRIGHT_RED).move_to(TOP).shift(DOWN)
 		
@@ -553,9 +554,17 @@ class ProjectionOntoBasis(Scene):
 		eig_np = np.array(eig_mtx_6) # imported from cov_mtx_6.py for keeping things clean
 		top_eig_np = eig_np[:,0:5]
 
-		top_eig_mtx = ColorMatrix(top_eig_np, no_text=True, norm_colors=True).mtx().move_to(ORIGIN)
+		top_eig_mtx = ColorMatrix(top_eig_np, no_text=True, norm_colors=True, tint='R').mtx().move_to(ORIGIN)
 		
 		top_eig_mtx.scale(0.07)
+
+		# self.add(top_eig_mtx)
+		lambda1_list = []
+		for i in range(64):
+			lambda1_list.append(top_eig_mtx[4+i*5]) 
+		lambda1 = VGroup(*lambda1_list)
+		# self.add(lambda1)
+		# self.wait(99)
 		
 
 		# a = top_eig_mtx.get_corner(TOP+LEFT)
@@ -570,7 +579,7 @@ class ProjectionOntoBasis(Scene):
 		eig_np = np.array(eig_mtx_6) # imported from cov_mtx_6.py for keeping things clean
 		top_eig_np_T = eig_np[:,0:5].T
 
-		top_eig_t = ColorMatrix(top_eig_np_T, no_text=True, norm_colors=True).mtx()
+		top_eig_t = ColorMatrix(top_eig_np_T, no_text=True, norm_colors=True, tint='R').mtx()
 		top_eig_t.scale(0.07)
 		top_eig_t.shift(UP+LEFT*2)
 
@@ -596,6 +605,16 @@ class ProjectionOntoBasis(Scene):
 		self.play(ApplyMethod(six_mtx_f.shift, LEFT*0.5))
 
 		self.wait()
+
+		lambda1_T = VGroup(top_eig_t[0:64])
+		
+
+		# self.play(ReplacementTransform(lambda1_T, lambda1)) 
+
+
+
+
+
 
 
 

@@ -38,8 +38,7 @@ class ColorMatrix:
 					shade = max(0, shade) # hack to prevent negative values from messing things up
 					
 				if tint=='R':
-					print("tint is R")
-					color_base = [1, 0, 0]
+					color_base = [1, 0.5, 0.5]
 				elif tint=='G': 
 					color_base = [0, 1, 0]
 				elif tint=='B':
