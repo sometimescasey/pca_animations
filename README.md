@@ -1,11 +1,13 @@
-# pca-vid
+# pca_animations
 
-Clone of the manim repository at https://github.com/3b1b/manim, for a video on PCA.
+Code dump for PCA visualization animations in blog post https://casey.li/pca/.
+
+Forked and modified from https://github.com/3b1b/manim
 
 Changes are:
 
-* casey_sandbox folder, for my video scripts / playing around
-* A few limited changes made to manim itself, for my purposes
+* casey_sandbox folder, for some custom matrix classes
+* A few limited changes to manim itself to make the add-ons work.
 
 # Manim
 Animation engine for explanatory math videos.
