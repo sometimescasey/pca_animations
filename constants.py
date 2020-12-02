@@ -22,7 +22,7 @@ elif os.path.exists("media_dir.txt"):
 else:
     MEDIA_DIR = os.path.join(
         os.path.expanduser('~'),
-        "~/gitrepo/pca_vid/casey_sandbox/media_output"
+        "~/repos/pca_animations/casey_sandbox/media_output"
     )
 
 if not os.path.exists(MEDIA_DIR):
