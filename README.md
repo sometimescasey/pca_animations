@@ -1,6 +1,6 @@
 # pca_animations
 
-Code dump for PCA visualization animations in blog post https://casey.li/pca/.
+Code dump for PCA visualization animations in blog post https://casey.li/pca/. A bit messy and broken in parts, but feel free to use and ask questions.
 
 Forked and modified from https://github.com/3b1b/manim
 
